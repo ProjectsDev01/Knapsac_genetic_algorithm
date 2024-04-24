@@ -40,9 +40,10 @@ def calculate_fitness(individual):
     total_value = np.sum(np.array(values) * np.array(individual))
     # Check if the individual violates the weight or space constraints
     if total_weight > max_weight or total_space > max_space:
-        return 0  # Return 0 fitness if violated
+        return 0, total_weight, []  # Return 0 fitness if violated, along with total weight and empty list of packed items
     else:
-        return total_value  # Otherwise, return the total value as fitness
+        packed_items = [index for index, item in enumerate(individual) if item == 1]  # Get indices of packed items
+        return total_value, total_weight, packed_items  # Otherwise, return the total value, total weight, and indices of packed items
 
 # Selection - Best Two Parents
 def selection(population, fitness_scores):
@@ -75,6 +76,8 @@ def genetic_algorithm():
     # Initialize variables to keep track of the best fitness and generation
     best_fitness = 0
     best_generation = 0
+    best_weight = 0
+    best_packed_items = []
     fitness_history = []  # List to store best fitness for each generation
     avg_fitness_history = []  # List to store average fitness for each generation
     
@@ -87,26 +90,28 @@ def genetic_algorithm():
         fitness_scores = [calculate_fitness(individual) for individual in population]
         
         # Find the best fitness score in the current generation
-        current_best_fitness = max(fitness_scores)
+        current_best_fitness, current_best_weight, current_best_packed_items = max(fitness_scores)
         
         # Update the best fitness and generation if a better fitness is found
         if current_best_fitness > best_fitness:
             best_fitness = current_best_fitness
             best_generation = generation
+            best_weight = current_best_weight
+            best_packed_items = current_best_packed_items
             
         # Calculate average fitness for the current generation
-        avg_fitness = np.mean(fitness_scores)
+        avg_fitness = np.mean([score[0] for score in fitness_scores])
         
         # Store best and average fitness for this generation
         fitness_history.append(current_best_fitness)
         avg_fitness_history.append(avg_fitness)
         
         # Select the best individual from the current population
-        best_individual_index = np.argmax(fitness_scores)
+        best_individual_index = np.argmax([score[0] for score in fitness_scores])
         new_population = [population[best_individual_index]]
         
         # Selection, crossover, and mutation
-        selected_population = selection(population, fitness_scores)
+        selected_population = selection(population, [score[0] for score in fitness_scores])
         for _ in range(int(population_size / 2)):
             parent1, parent2 = selected_population
             child1, child2 = crossover(parent1, parent2)
@@ -115,10 +120,10 @@ def genetic_algorithm():
         population = mutated_population
         
         # Print generation and best fitness for monitoring
-        print("Generation:", generation, "Best Fitness:", current_best_fitness)
+        print("Generation:", generation, "Best Fitness:", current_best_fitness, "Weight:", current_best_weight, "Packed Items:", current_best_packed_items)
         
-    # Return the best overall fitness, the generation where it was achieved, and fitness history
-    return best_fitness, best_generation, fitness_history, avg_fitness_history
+    # Return the best overall fitness, the generation where it was achieved, fitness history, best weight, and packed items
+    return best_fitness, best_generation, fitness_history, avg_fitness_history, best_weight, best_packed_items
 
 # Plot fitness over generations
 def plot_fitness_over_generations(fitness_history, avg_fitness_history):
@@ -135,11 +140,13 @@ def plot_fitness_over_generations(fitness_history, avg_fitness_history):
 ''' Main loop '''
 def main():
     # Run the genetic algorithm
-    best_fitness, best_generation, fitness_history, avg_fitness_history = genetic_algorithm()
+    best_fitness, best_generation, fitness_history, avg_fitness_history, best_weight, best_packed_items = genetic_algorithm()
 
-    # Print the best overall fitness and the generation where it was achieved
+    # Print the best overall fitness, the generation where it was achieved, and best weight
     print("Best overall fitness:", best_fitness)
     print("Achieved at generation:", best_generation)   
+    print("Weight:", best_weight)
+    print("Packed items indices:", best_packed_items)
     
     # Plot fitness over generations
     plot_fitness_over_generations(fitness_history, avg_fitness_history)
