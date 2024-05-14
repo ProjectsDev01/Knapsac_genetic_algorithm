@@ -8,7 +8,7 @@ max_weight = 50
 max_space = 80
 population_size = 50
 # Always best answer at 5000, 99 centile at 100 
-generations = 100
+generations = 1000
 mutation_rate = 0.1
 
 ''' Connection to the database '''

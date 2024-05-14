@@ -2,7 +2,7 @@ import sqlite3
 import random
 
 # Variables
-num_items = 40  # Adjust as needed (value of items generated in db)
+num_items = 60  # Adjust as needed (value of items generated in db)
 
 # Connect to the database (creates it if it doesn't exist)
 conn = sqlite3.connect('items_list.db')
